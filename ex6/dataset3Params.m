@@ -22,22 +22,15 @@ sigma = 0.3;
 %  Note: You can compute the prediction error using 
 %        mean(double(predictions ~= yval))
 %
-vals = zeros(8,8);
-
-for i = 1:8,
-  C=C*2^i;
-  sigma = 0.3;
-  for j = 1:8,
-    sigma = sigma*i;
-    sim = gaussianKernel(sigma)
-    tetra = svmTrain(X, y, C, @(x1, x2)gaussianKernel(x1, x2, sigma))   
+vals = zeros(7,7);
+test_values = [0.01, 0.03, 0.1, 0.3, 1, 3, 10];
+for i = 1:7,
+  C=test_values(i);
+  for j = 1:7,
+    sigma = test_values(j);
+    tetra = svmTrain(X, y, C, @(x1, x2) gaussianKernel(x1, x2, sigma));
     hyp = svmPredict(tetra, Xval);
-    cost = 0;
-    for k= 1:length(hyp),
-      if hyp(k) != yval(k),
-        cost = cost + 1;
-      endif
-    end
+    cost = mean(double(hyp ~= yval));
     vals(i,j) = cost;
   end
 end
@@ -45,9 +38,9 @@ end
 
 
 [minval, row] = min(min(vals,[],2));
-C = (2^row)*0.1; 
+C = test_values(row); 
 [minval, col] = min(min(vals,[],1));     
-sigma = 0.3*col;
+sigma = test_values(col);
 
 
 
